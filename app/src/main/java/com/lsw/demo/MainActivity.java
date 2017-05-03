@@ -3,6 +3,7 @@ package com.lsw.demo;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mButton;
     private static final String TAG = "MainActivity";
     private static final String BASE_URL = "http://pic8.qiyipic.com/image/";
-    private static final String DOWNLOAD_URL = "20170413/47/c7/bk_100084970_r_601_m2.jpg";
+    private static final String DOWNLOAD_URL = "http://pic8.qiyipic.com/image/20170413/47/c7/bk_100084970_r_601_m2.jpg";
     private static final String BOOK_ID = "208766239";
 
     @Override
@@ -38,25 +39,31 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startDownload();
+                startDownload(BOOK_ID,DOWNLOAD_URL);
             }
         });
     }
 
-    private void startDownload() {
+    private void startDownload(String bookId,String url) {
+
+        final File file = new File(getCoverPicturePath(bookId,url));
+        if(file.exists()){
+            return;
+        }
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .build();
         DownloadApi downloadService = retrofit.create(DownloadApi.class);
 
-        Call<ResponseBody> call = downloadService.downloadFileWithDynamicUrlAsync(DOWNLOAD_URL);
+        Call<ResponseBody> call = downloadService.downloadCoverPicture(url);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "server contacted and has file");
-                    String imgCacheDirectory = new File(getBookCoverPicPath(BOOK_ID),DOWNLOAD_URL.substring(DOWNLOAD_URL.lastIndexOf("/")+1)).getAbsolutePath();
+                    String imgCacheDirectory = file.getAbsolutePath();
                     inputstream2File(response.body().byteStream(), imgCacheDirectory);
                 } else {
                     Log.d(TAG, "server contact failed");
@@ -69,23 +76,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    public String getBookCoverPicPath(String qipuBookId)
-    {
-        boolean sdCardExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-        File sdDir;
-        if (sdCardExist)
-        {
-            sdDir = Environment.getExternalStorageDirectory();
-            StringBuilder path = new StringBuilder();
-            path.append(sdDir.getAbsolutePath());
-            path.append("/QYReader/CoverPicture");
-            path.append("/" + qipuBookId);
-            return path.toString();
-        }
-        return null;
-    }
-
 
     public void inputstream2File(InputStream inputStream, String filePath) {
         File file = new File(filePath);
@@ -108,6 +98,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String getCoverPicturePath(String bookId,String url){
+
+        if(TextUtils.isEmpty(bookId)||TextUtils.isEmpty(url)){
+            return "";
+        }
+        String picName = url.substring(url.lastIndexOf("/")+1);
+        boolean sdCardExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        File sdDir;
+        if (sdCardExist)
+        {
+            sdDir = Environment.getExternalStorageDirectory();
+            StringBuilder path = new StringBuilder();
+            path.append(sdDir.getAbsolutePath());
+            path.append("/QYReader/cover_picture");
+            path.append("/" + bookId);
+            path.append("/" + picName);
+            return path.toString();
+        }
+        return "";
     }
 
 }

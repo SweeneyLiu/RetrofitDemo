@@ -13,5 +13,5 @@ import retrofit2.http.Url;
 public interface DownloadApi {
     @Streaming
     @GET
-    Call<ResponseBody> downloadFileWithDynamicUrlAsync(@Url String fileUrl);
+    Call<ResponseBody> downloadCoverPicture(@Url String fileUrl);
 }
