@@ -63,8 +63,14 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "server contacted and has file");
-                    String imgCacheDirectory = file.getAbsolutePath();
-                    inputstream2File(response.body().byteStream(), imgCacheDirectory);
+                    final String imgCacheDirectory = file.getAbsolutePath();
+                    final ResponseBody responseBody = response.body();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            inputstream2File(responseBody.byteStream(), imgCacheDirectory);
+                        }
+                    }).start();
                 } else {
                     Log.d(TAG, "server contact failed");
                 }
