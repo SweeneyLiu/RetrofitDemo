@@ -39,7 +39,13 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startDownload(BOOK_ID,DOWNLOAD_URL);
+//                startDownload(BOOK_ID,DOWNLOAD_URL);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        synDownloadCoverPicture(BOOK_ID,DOWNLOAD_URL);
+                    }
+                }).start();
             }
         });
     }
@@ -82,6 +88,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * @param bookId
+     * @param url
+     */
+    public void synDownloadCoverPicture(String bookId,String url) {
+
+        File file = new File(getCoverPicturePath(bookId,url));
+        if(file.exists()){
+            return;
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .build();
+        DownloadApi downloadService = retrofit.create(DownloadApi.class);
+
+        Call<ResponseBody> call = downloadService.downloadCoverPicture(url);
+        try {
+            Response<ResponseBody> response = call.execute();
+            inputstream2File(response.body().byteStream(), file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void inputstream2File(InputStream inputStream, String filePath) {
         File file = new File(filePath);
