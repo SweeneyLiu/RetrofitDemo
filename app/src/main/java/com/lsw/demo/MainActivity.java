@@ -11,10 +11,17 @@ import android.widget.Button;
 import com.lsw.demo.api.DownloadApi;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.util.logging.Logger;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -43,7 +50,9 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        synDownloadCoverPicture(BOOK_ID,DOWNLOAD_URL);
+//                        synDownloadCoverPicture(BOOK_ID,DOWNLOAD_URL);
+                        String filePath = getEPubFilePath("17221839",false);
+                        Log.i(TAG, "run: md5 = "+getMd5ByFile(new File(filePath)));
                     }
                 }).start();
             }
@@ -157,6 +166,54 @@ public class MainActivity extends AppCompatActivity {
             return path.toString();
         }
         return "";
+    }
+
+    public String getMd5ByFile(File file) {
+        String value = null;
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            MappedByteBuffer byteBuffer = in.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.update(byteBuffer);
+            BigInteger bi = new BigInteger(1, md5.digest());
+            value = bi.toString(16);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != in) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return value;
+    }
+
+
+    /**
+     * 获取ePub存储路径
+     * @param qipuBookId
+     * @param isPurchased
+     * @return
+     */
+    public String getEPubFilePath(String qipuBookId, boolean isPurchased) {
+        boolean sdCardExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        File sdDir;
+        if (sdCardExist) {
+            sdDir = Environment.getExternalStorageDirectory();
+            StringBuilder path = new StringBuilder();
+            path.append(sdDir.getAbsolutePath());
+            path.append("/QYReader/epubs");
+            if (!isPurchased) {
+                //对于免费章节，统一存储到匿名用户的目录中
+                path.append("/0/" + qipuBookId + "/" + qipuBookId + "_trial.epub");
+            }
+            return path.toString();
+        }
+        return null;
     }
 
 }
