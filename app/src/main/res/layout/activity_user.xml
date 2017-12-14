@@ -5,15 +5,15 @@
               android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/to_download"
+        android:id="@+id/getScore"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="测试Retrofit下载图片" />
+        android:text="获取评分数据" />
 
-    <Button
-        android:id="@+id/to_user"
+    <TextView
+        android:id="@+id/result"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="测试Retrofit使用" />
+        android:layout_height="match_parent"
+        android:text="显示结果"/>
 
 </LinearLayout>

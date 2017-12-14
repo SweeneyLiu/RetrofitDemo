@@ -1,4 +1,4 @@
-package com.lsw.demo;
+package com.lsw.demo.activity;
 
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -8,11 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.lsw.demo.R;
 import com.lsw.demo.api.DownloadApi;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,6 @@ import java.math.BigInteger;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
-import java.util.logging.Logger;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -29,7 +28,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class MainActivity extends AppCompatActivity {
+public class DownloadActivity extends AppCompatActivity {
 
     private Button mButton;
     private static final String TAG = "MainActivity";
@@ -40,8 +39,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_second);
         mButton = (Button)findViewById(R.id.download);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void startDownload(String bookId,String url) {
 
